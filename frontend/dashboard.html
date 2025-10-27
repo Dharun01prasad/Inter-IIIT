@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Study Buddy - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0f;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(ellipse at 20% 30%, rgba(138, 43, 226, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 70%, rgba(255, 0, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .header {
+            background: rgba(15, 15, 25, 0.9);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 20px;
+            box-shadow: 
+                0 0 80px rgba(138, 43, 226, 0.3),
+                inset 0 0 60px rgba(138, 43, 226, 0.05);
+            text-align: center;
+            grid-column: 1 / -1;
+            backdrop-filter: blur(10px);
+            animation: headerGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes headerGlow {
+            0%, 100% {
+                box-shadow: 
+                    0 0 80px rgba(138, 43, 226, 0.3),
+                    inset 0 0 60px rgba(138, 43, 226, 0.05);
+            }
+            50% {
+                box-shadow: 
+                    0 0 100px rgba(138, 43, 226, 0.4),
+                    inset 0 0 80px rgba(138, 43, 226, 0.08);
+            }
+        }
+
+        h1 {
+            background: linear-gradient(135deg, #8a2be2 0%, #ff00ff 50%, #da70d6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            font-weight: 700;
+            animation: titleGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { filter: drop-shadow(0 0 10px rgba(138, 43, 226, 0.6)); }
+            50% { filter: drop-shadow(0 0 20px rgba(255, 0, 255, 0.8)); }
+        }
+
+        .subtitle {
+            color: #b19cd9;
+            font-size: 1.1em;
+            letter-spacing: 0.5px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+            grid-column: 1 / -1;
+        }
+
+        .stat-card {
+            background: rgba(15, 15, 25, 0.9);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(138, 43, 226, 0.2);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(138, 43, 226, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .stat-card:hover::before {
+            left: 100%;
+        }
+
+        .stat-card:hover {
+            border-color: #8a2be2;
+            box-shadow: 0 0 50px rgba(138, 43, 226, 0.4);
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #8a2be2, #ff00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: #b19cd9;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .left-panel, .right-panel {
+            background: rgba(15, 15, 25, 0.9);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 0 40px rgba(138, 43, 226, 0.2);
+            backdrop-filter: blur(10px);
+            min-height: 600px;
+        }
+
+        .left-panel {
+            height: fit-content;
+        }
+
+        .section-title {
+            color: #da70d6;
+            font-size: 1.3em;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(138, 43, 226, 0.3);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(180deg, #8a2be2, #ff00ff);
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(138, 43, 226, 0.6);
+        }
+
+        .pdf-list {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .pdf-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .pdf-list::-webkit-scrollbar-track {
+            background: rgba(138, 43, 226, 0.1);
+            border-radius: 4px;
+        }
+
+        .pdf-list::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #8a2be2, #ff00ff);
+            border-radius: 4px;
+        }
+
+        .pdf-item {
+            background: rgba(138, 43, 226, 0.08);
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 12px;
+            border-left: 4px solid #8a2be2;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(138, 43, 226, 0.2);
+        }
+
+        .pdf-item:hover {
+            background: rgba(138, 43, 226, 0.15);
+            transform: translateX(8px);
+            box-shadow: 0 0 25px rgba(138, 43, 226, 0.3);
+            border-color: #8a2be2;
+        }
+
+        .pdf-item.active {
+            background: linear-gradient(135deg, rgba(138, 43, 226, 0.6), rgba(255, 0, 255, 0.6));
+            border-color: #ff00ff;
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.4);
+        }
+
+        .pdf-item.active .pdf-name,
+        .pdf-item.active .pdf-meta {
+            color: #fff;
+        }
+
+        .pdf-name {
+            font-weight: 600;
+            color: #e0e0ff;
+            margin-bottom: 8px;
+            font-size: 1em;
+        }
+
+        .pdf-meta {
+            color: #b19cd9;
+            font-size: 0.85em;
+        }
+
+        .activity-list {
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .activity-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .activity-list::-webkit-scrollbar-track {
+            background: rgba(138, 43, 226, 0.1);
+            border-radius: 4px;
+        }
+
+        .activity-list::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #8a2be2, #ff00ff);
+            border-radius: 4px;
+        }
+
+        .activity-item {
+            background: rgba(138, 43, 226, 0.08);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #00ff7f;
+            border: 1px solid rgba(138, 43, 226, 0.2);
+            transition: all 0.3s;
+        }
+
+        .activity-item:hover {
+            background: rgba(138, 43, 226, 0.12);
+            box-shadow: 0 0 25px rgba(138, 43, 226, 0.3);
+        }
+
+        .question {
+            font-weight: 600;
+            color: #e0e0ff;
+            margin-bottom: 12px;
+            font-size: 1em;
+        }
+
+        .answer {
+            color: #b19cd9;
+            margin-bottom: 12px;
+            line-height: 1.6;
+            font-size: 0.95em;
+        }
+
+        .activity-meta {
+            color: #8888aa;
+            font-size: 0.85em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .sources {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .source-badge {
+            background: linear-gradient(135deg, rgba(138, 43, 226, 0.6), rgba(255, 0, 255, 0.6));
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+            border: 1px solid rgba(138, 43, 226, 0.5);
+            box-shadow: 0 0 10px rgba(138, 43, 226, 0.3);
+        }
+
+        .citation-toggle-btn {
+            background: linear-gradient(135deg, rgba(0, 255, 127, 0.2), rgba(0, 200, 83, 0.2));
+            color: #00ff7f;
+            border: 1px solid rgba(0, 255, 127, 0.4);
+            padding: 6px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.75em;
+            font-weight: 600;
+            margin-top: 10px;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+
+        .citation-toggle-btn:hover {
+            background: linear-gradient(135deg, rgba(0, 255, 127, 0.3), rgba(0, 200, 83, 0.3));
+            box-shadow: 0 0 15px rgba(0, 255, 127, 0.3);
+        }
+
+        .citations-box {
+            display: none;
+            margin-top: 12px;
+            padding: 12px;
+            background: rgba(0, 255, 127, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(0, 255, 127, 0.2);
+        }
+
+        .citations-box.show {
+            display: block;
+        }
+
+        .citation-item-dash {
+            background: rgba(15, 15, 25, 0.8);
+            border-left: 3px solid #00ff7f;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            font-size: 0.85em;
+        }
+
+        .citation-item-dash:last-child {
+            margin-bottom: 0;
+        }
+
+        .citation-header-dash {
+            color: #00ff7f;
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 0.9em;
+        }
+
+        .citation-text-dash {
+            color: #b19cd9;
+            line-height: 1.5;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            grid-column: 1 / -1;
+        }
+
+        button {
+            background: linear-gradient(135deg, #8a2be2 0%, #ff00ff 100%);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 0.95em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 25px rgba(138, 43, 226, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 40px rgba(138, 43, 226, 0.6);
+        }
+
+        button.danger {
+            background: linear-gradient(135deg, #ff0064 0%, #c82333 100%);
+            box-shadow: 0 0 25px rgba(255, 0, 100, 0.4);
+        }
+
+        button.danger:hover {
+            box-shadow: 0 0 40px rgba(255, 0, 100, 0.6);
+        }
+
+        button.success {
+            background: linear-gradient(135deg, #00ff7f 0%, #00c853 100%);
+            box-shadow: 0 0 25px rgba(0, 255, 127, 0.4);
+        }
+
+        button.success:hover {
+            box-shadow: 0 0 40px rgba(0, 255, 127, 0.6);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #8888aa;
+            padding: 40px;
+            font-style: italic;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            grid-column: 1 / -1;
+        }
+
+        .nav-button {
+            background: rgba(15, 15, 25, 0.9);
+            color: #da70d6;
+            border: 2px solid rgba(138, 43, 226, 0.5);
+            padding: 12px 24px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9em;
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.2);
+        }
+
+        .nav-button:hover {
+            background: linear-gradient(135deg, rgba(138, 43, 226, 0.4), rgba(255, 0, 255, 0.4));
+            color: #fff;
+            transform: translateY(-3px);
+            box-shadow: 0 0 35px rgba(138, 43, 226, 0.5);
+        }
+
+        .loading {
+            text-align: center;
+            color: #da70d6;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 3px solid rgba(138, 43, 226, 0.2);
+            border-top: 3px solid #8a2be2;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+            box-shadow: 0 0 30px rgba(138, 43, 226, 0.4);
+        }
+
+        .selected-pdf-info {
+            background: rgba(33, 150, 243, 0.15);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196F3;
+            border: 1px solid rgba(33, 150, 243, 0.3);
+            color: #7ec8ff;
+        }
+
+        .selected-pdf-info strong {
+            color: #2196F3;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-buttons">
+            <a href="index.html" class="nav-button">Main App</a>
+            <a href="dashboard.html" class="nav-button">Dashboard</a>
+        </div>
+
+        <div class="header">
+            <h1>📊 Study Buddy Dashboard</h1>
+            <p class="subtitle">Click on a PDF to view its Q&A history</p>
+        </div>
+
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalPdfs">0</div>
+                <div class="stat-label">PDFs Uploaded</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalQuestions">0</div>
+                <div class="stat-label">Total Questions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="currentChunks">0</div>
+                <div class="stat-label">Current Chunks</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="filteredQuestions">0</div>
+                <div class="stat-label">Filtered Questions</div>
+            </div>
+        </div>
+
+        <div class="left-panel">
+            <div class="section-title">📄 PDF Documents</div>
+            <div class="pdf-list" id="pdfList">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    Loading PDFs...
+                </div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="section-title" id="activityTitle">All Q&A Activity</div>
+            
+            <div class="selected-pdf-info" id="selectedPdfInfo" style="display: none;">
+                <strong>Viewing questions for: </strong><span id="selectedPdfName"></span>
+            </div>
+
+            <div class="activity-list" id="activityList">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    Loading activity...
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button onclick="showAllActivity()">Show All Activity</button>
+            <button onclick="downloadActivityLog()" class="success">Download Excel</button>
+            <button onclick="clearAllData()" class="danger">Clear All Data</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000';
+        let selectedPdfId = null;
+        let allActivityLog = [];
+
+        document.addEventListener('DOMContentLoaded', loadDashboard);
+
+        async function loadDashboard() {
+            try {
+                const response = await fetch(`${API_URL}/dashboard/`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    updateStats(data.stats);
+                    updatePDFList(data.pdf_history);
+                    allActivityLog = data.activity_log;
+                    updateActivityLog(allActivityLog);
+                } else {
+                    showError('Failed to load dashboard data');
+                }
+            } catch (error) {
+                showError('Error loading dashboard: ' + error.message);
+            }
+        }
+
+        function updateStats(stats) {
+            document.getElementById('totalPdfs').textContent = stats.total_pdfs;
+            document.getElementById('totalQuestions').textContent = stats.total_questions;
+            document.getElementById('currentChunks').textContent = stats.current_chunks;
+            document.getElementById('filteredQuestions').textContent = stats.total_questions;
+        }
+
+        function updatePDFList(pdfHistory) {
+            const container = document.getElementById('pdfList');
+            
+            if (pdfHistory.length === 0) {
+                container.innerHTML = '<div class="empty-state">No PDFs uploaded yet</div>';
+                return;
+            }
+
+            const reversedHistory = [...pdfHistory].reverse();
+            
+            container.innerHTML = reversedHistory.map(pdf => `
+                <div class="pdf-item" onclick="selectPdf('${pdf.id}', '${pdf.filename}')" id="pdf-${pdf.id}">
+                    <div class="pdf-name">${pdf.filename}</div>
+                    <div class="pdf-meta">
+                        📅 ${new Date(pdf.upload_time).toLocaleString()} | 
+                        📄 ${pdf.pages} pages
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleCitations(activityIndex) {
+            const citationsBox = document.getElementById(`citations-${activityIndex}`);
+            const toggleBtn = document.getElementById(`toggle-${activityIndex}`);
+            
+            if (citationsBox.classList.contains('show')) {
+                citationsBox.classList.remove('show');
+                toggleBtn.textContent = '🔍 Show Citations';
+            } else {
+                citationsBox.classList.add('show');
+                toggleBtn.textContent = '🔼 Hide Citations';
+            }
+        }
+
+        function updateActivityLog(activityLog, pdfName = '') {
+            const container = document.getElementById('activityList');
+            const title = document.getElementById('activityTitle');
+            const selectedInfo = document.getElementById('selectedPdfInfo');
+            const filteredQuestions = document.getElementById('filteredQuestions');
+
+            filteredQuestions.textContent = activityLog.length;
+
+            if (pdfName) {
+                title.textContent = `💬 Q&A for: ${pdfName}`;
+                selectedInfo.style.display = 'block';
+                document.getElementById('selectedPdfName').textContent = pdfName;
+            } else {
+                title.textContent = '💬 All Q&A Activity';
+                selectedInfo.style.display = 'none';
+            }
+            
+            if (activityLog.length === 0) {
+                container.innerHTML = '<div class="empty-state">No questions asked yet</div>';
+                return;
+            }
+
+            const reversedLog = [...activityLog].reverse();
+            
+            container.innerHTML = reversedLog.map((activity, index) => {
+                const hasCitations = activity.citations && activity.citations.length > 0;
+                const citationsHTML = hasCitations ? `
+                    <button class="citation-toggle-btn" id="toggle-${index}" onclick="toggleCitations(${index})">
+                        🔍 Show Citations
+                    </button>
+                    <div class="citations-box" id="citations-${index}">
+                        ${activity.citations.map((citation, citIndex) => `
+                            <div class="citation-item-dash">
+                                <div class="citation-header-dash">📄 Source ${citIndex + 1} - Page ${citation.page}</div>
+                                <div class="citation-text-dash">${citation.text}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : '';
+
+                return `
+                    <div class="activity-item">
+                        <div class="question">❓ ${activity.question}</div>
+                        <div class="answer">${activity.answer}</div>
+                        <div class="activity-meta">
+                            <span>📅 ${new Date(activity.timestamp).toLocaleString()}</span>
+                            <span>🔢 ${activity.context_chunks} chunks</span>
+                        </div>
+                        ${activity.sources.length > 0 ? `
+                            <div class="sources">
+                                ${activity.sources.map(page => `<span class="source-badge">Page ${page}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                        ${citationsHTML}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function selectPdf(pdfId, pdfName) {
+            selectedPdfId = pdfId;
+            
+            document.querySelectorAll('.pdf-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.getElementById(`pdf-${pdfId}`).classList.add('active');
+            
+            const filteredActivity = allActivityLog.filter(activity => activity.pdf_id === pdfId);
+            updateActivityLog(filteredActivity, pdfName);
+        }
+
+        function showAllActivity() {
+            selectedPdfId = null;
+            document.querySelectorAll('.pdf-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            updateActivityLog(allActivityLog);
+        }
+
+        async function downloadActivityLog() {
+            try {
+                const response = await fetch(`${API_URL}/download_activity/`);
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = `study_buddy_activity_${new Date().toISOString().split('T')[0]}.xlsx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                } else {
+                    alert('Error downloading activity log');
+                }
+            } catch (error) {
+                alert('Error downloading: ' + error.message);
+            }
+        }
+
+        async function clearAllData() {
+            if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
+                try {
+                    const response = await fetch(`${API_URL}/dashboard/clear_all`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (response.ok) {
+                        alert('All data cleared successfully');
+                        await loadDashboard();
+                    } else {
+                        alert('Error clearing data');
+                    }
+                } catch (error) {
+                    alert('Error clearing data: ' + error.message);
+                }
+            }
+        }
+
+        function showError(message) {
+            alert('Error: ' + message);
+        }
+
+        setInterval(loadDashboard, 30000);
+    </script>
+</body>
+</html>

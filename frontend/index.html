@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Study Buddy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0f;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(ellipse at 20% 30%, rgba(138, 43, 226, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 70%, rgba(255, 0, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.8;
+            }
+        }
+
+        .container {
+            background: rgba(15, 15, 25, 0.9);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            border-radius: 24px;
+            padding: 50px;
+            max-width: 900px;
+            width: 100%;
+            box-shadow:
+                0 0 80px rgba(138, 43, 226, 0.3),
+                0 0 120px rgba(255, 0, 255, 0.2),
+                inset 0 0 60px rgba(138, 43, 226, 0.05);
+            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 1;
+            animation: containerGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes containerGlow {
+
+            0%,
+            100% {
+                box-shadow:
+                    0 0 80px rgba(138, 43, 226, 0.3),
+                    0 0 120px rgba(255, 0, 255, 0.2),
+                    inset 0 0 60px rgba(138, 43, 226, 0.05);
+            }
+
+            50% {
+                box-shadow:
+                    0 0 100px rgba(138, 43, 226, 0.4),
+                    0 0 140px rgba(255, 0, 255, 0.3),
+                    inset 0 0 80px rgba(138, 43, 226, 0.08);
+            }
+        }
+
+        .nav-link {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(135deg, rgba(138, 43, 226, 0.2) 0%, rgba(255, 0, 255, 0.2) 100%);
+            color: #e0e0ff;
+            padding: 12px 24px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid rgba(138, 43, 226, 0.5);
+            transition: all 0.3s;
+            font-size: 0.95em;
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.3);
+            z-index: 1000;
+            /* Ensure it stays on top */
+        }
+
+        .nav-link:hover {
+            background: linear-gradient(135deg, rgba(138, 43, 226, 0.4) 0%, rgba(255, 0, 255, 0.4) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(138, 43, 226, 0.5);
+        }
+
+        h1 {
+            background: linear-gradient(135deg, #8a2be2 0%, #ff00ff 50%, #da70d6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 3em;
+            font-weight: 700;
+            text-shadow: 0 0 30px rgba(138, 43, 226, 0.5);
+            animation: titleGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes titleGlow {
+
+            0%,
+            100% {
+                filter: drop-shadow(0 0 10px rgba(138, 43, 226, 0.6));
+            }
+
+            50% {
+                filter: drop-shadow(0 0 20px rgba(255, 0, 255, 0.8));
+            }
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #b19cd9;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+            letter-spacing: 0.5px;
+        }
+
+        .section {
+            margin-bottom: 35px;
+            padding: 25px;
+            background: rgba(138, 43, 226, 0.05);
+            border-radius: 16px;
+            border: 1px solid rgba(138, 43, 226, 0.2);
+            transition: all 0.3s;
+        }
+
+        .section:hover {
+            border-color: rgba(138, 43, 226, 0.4);
+            background: rgba(138, 43, 226, 0.08);
+        }
+
+        .section-title {
+            color: #da70d6;
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(180deg, #8a2be2, #ff00ff);
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(138, 43, 226, 0.6);
+        }
+
+        .upload-area {
+            border: 2px dashed rgba(138, 43, 226, 0.5);
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(138, 43, 226, 0.03);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(138, 43, 226, 0.1), transparent);
+            transform: rotate(0deg);
+            transition: all 0.6s;
+        }
+
+        .upload-area:hover::before {
+            transform: rotate(180deg);
+        }
+
+        .upload-area:hover {
+            border-color: #8a2be2;
+            background: rgba(138, 43, 226, 0.08);
+            box-shadow:
+                0 0 30px rgba(138, 43, 226, 0.3),
+                inset 0 0 30px rgba(138, 43, 226, 0.1);
+        }
+
+        .upload-area.active {
+            border-color: #ff00ff;
+            background: rgba(255, 0, 255, 0.1);
+            box-shadow: 0 0 40px rgba(255, 0, 255, 0.4);
+        }
+
+        .upload-area p {
+            color: #c8a2e8;
+            font-size: 1.1em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .upload-area p:last-child {
+            color: #8888aa;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        button {
+            background: linear-gradient(135deg, #8a2be2 0%, #ff00ff 100%);
+            color: #fff;
+            border: none;
+            padding: 16px 40px;
+            border-radius: 12px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 30px rgba(138, 43, 226, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 50px rgba(138, 43, 226, 0.6);
+        }
+
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        button:disabled:hover::before {
+            left: -100%;
+        }
+
+        .input-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 16px 55px 16px 16px;
+            /* Increased right padding from 60px to 55px */
+            border: 2px solid rgba(138, 43, 226, 0.3);
+            border-radius: 12px;
+            font-size: 1em;
+            transition: all 0.3s;
+            background: rgba(15, 15, 25, 0.8);
+            color: #e0e0ff;
+        }
+
+        input[type="text"]::placeholder {
+            color: #7777aa;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #8a2be2;
+            box-shadow: 0 0 25px rgba(138, 43, 226, 0.4);
+            background: rgba(15, 15, 25, 0.95);
+        }
+
+        .input-button {
+            position: relative;
+        }
+
+        .voice-button {
+            position: absolute;
+            right: 8px;
+            top: 8px;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, rgba(138, 43, 226, 0.3), rgba(255, 0, 255, 0.3));
+            border: 2px solid rgba(138, 43, 226, 0.5);
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(138, 43, 226, 0.3);
+        }
+
+        .voice-button:hover {
+            background: linear-gradient(135deg, rgba(138, 43, 226, 0.5), rgba(255, 0, 255, 0.5));
+            box-shadow: 0 0 25px rgba(138, 43, 226, 0.5);
+            /* transform: translateY(-5%) scale(1.05); */
+        }
+
+        .voice-button.listening {
+            background: linear-gradient(135deg, rgba(255, 0, 100, 0.5), rgba(255, 50, 50, 0.5));
+            animation: pulse-listening 1.5s ease-in-out infinite;
+            box-shadow: 0 0 30px rgba(255, 0, 100, 0.6);
+        }
+
+        @keyframes pulse-listening {
+
+            0%,
+            100% {
+                box-shadow: 0 0 30px rgba(255, 0, 100, 0.6);
+            }
+
+            50% {
+                box-shadow: 0 0 50px rgba(255, 0, 100, 0.9);
+            }
+        }
+
+        .voice-button:disabled {
+            opacity: 0.8;
+            cursor: not-allowed;
+        }
+
+        .voice-status {
+            text-align: center;
+            color: #ff0064;
+            font-size: 0.9em;
+            margin-top: -15px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            display: none;
+        }
+
+        .voice-status.show {
+            display: block;
+        }
+
+        .status {
+            padding: 16px;
+            border-radius: 12px;
+            margin-top: 15px;
+            font-weight: 500;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .mic-image {
+            height: 35px;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .status.success {
+            background: rgba(0, 255, 127, 0.1);
+            color: #00ff7f;
+            border: 1px solid rgba(0, 255, 127, 0.3);
+            box-shadow: 0 0 20px rgba(0, 255, 127, 0.2);
+        }
+
+        .status.error {
+            background: rgba(255, 0, 100, 0.1);
+            color: #ff0064;
+            border: 1px solid rgba(255, 0, 100, 0.3);
+            box-shadow: 0 0 20px rgba(255, 0, 100, 0.2);
+        }
+
+        .answer-box {
+            background: rgba(138, 43, 226, 0.08);
+            border-left: 4px solid #8a2be2;
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 25px;
+            display: none;
+            box-shadow: 0 0 30px rgba(138, 43, 226, 0.2);
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .answer-box.show {
+            display: block;
+        }
+
+        .answer-text {
+            color: #d8d8f0;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            font-size: 1.05em;
+        }
+
+        .sources {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .sources strong {
+            color: #da70d6;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .source-badge {
+            background: linear-gradient(135deg, rgba(138, 43, 226, 0.6) 0%, rgba(255, 0, 255, 0.6) 100%);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            border: 1px solid rgba(138, 43, 226, 0.5);
+            box-shadow: 0 0 15px rgba(138, 43, 226, 0.3);
+            transition: all 0.3s;
+        }
+
+        .source-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(138, 43, 226, 0.5);
+        }
+
+        .citation-toggle {
+            background: linear-gradient(135deg, rgba(0, 255, 127, 0.2) 0%, rgba(0, 200, 83, 0.2) 100%);
+            color: #00ff7f;
+            border: 2px solid rgba(0, 255, 127, 0.4);
+            padding: 12px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-top: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 20px rgba(0, 255, 127, 0.2);
+        }
+
+        .citation-toggle:hover {
+            background: linear-gradient(135deg, rgba(0, 255, 127, 0.3) 0%, rgba(0, 200, 83, 0.3) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(0, 255, 127, 0.4);
+        }
+
+        .citation-toggle.active {
+            background: linear-gradient(135deg, rgba(0, 255, 127, 0.4) 0%, rgba(0, 200, 83, 0.4) 100%);
+        }
+
+        .citations-container {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(0, 255, 127, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 127, 0.2);
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+        .citations-container.show {
+            display: block;
+        }
+
+        .citation-item {
+            background: rgba(15, 15, 25, 0.8);
+            border-left: 4px solid #00ff7f;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 255, 127, 0.3);
+        }
+
+        .citation-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .citation-header {
+            color: #00ff7f;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .citation-text {
+            color: #b19cd9;
+            line-height: 1.6;
+            font-size: 0.95em;
+        }
+
+        .loading {
+            text-align: center;
+            color: #da70d6;
+            font-weight: 600;
+            display: none;
+            padding: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid rgba(138, 43, 226, 0.2);
+            border-top: 3px solid #8a2be2;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            box-shadow: 0 0 30px rgba(138, 43, 226, 0.4);
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .download-section button {
+            background: linear-gradient(135deg, #00ff7f 0%, #00c853 100%);
+            box-shadow: 0 0 30px rgba(0, 255, 127, 0.4);
+        }
+
+        .download-section button:hover {
+            box-shadow: 0 0 50px rgba(0, 255, 127, 0.6);
+        }
+
+        .download-section p {
+            color: #8888aa;
+            font-size: 0.95em;
+            margin-top: 12px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .nav-link {
+                position: static;
+                display: block;
+                margin-bottom: 20px;
+                text-align: center;
+                width: fit-content;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .voice-button {
+                right: 10px;
+                width: 38px;
+                height: 38px;
+                font-size: 1.1em;
+            }
+
+            input[type="text"] {
+                padding: 16px 50px 16px 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <a href="dashboard.html" class="nav-link">View Dashboard</a>
+
+        <h1>📚 Smart Study Buddy</h1>
+        <p class="subtitle">Upload your PDF and ask questions!</p>
+
+        <div class="section">
+            <div class="section-title">Step 1: Upload Your PDF</div>
+            <div class="upload-area" id="uploadArea">
+                <p>📄 Click to upload or drag and drop your PDF here</p>
+                <p>Supported: PDF files</p>
+            </div>
+            <input type="file" id="fileInput" accept=".pdf">
+            <div id="uploadStatus"></div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Step 2: Ask a Question</div>
+            <div class="input-container">
+                <input type="text" id="questionInput" placeholder="e.g., What is the main topic discussed?" disabled
+                    class="input-button">
+                <button class="voice-button" id="voiceButton" title="Click to speak" disabled>
+                    <img src="images/Untitled_design__8_-removebg-preview.png" class="mic-image">
+                </button>
+            </div>
+            <div class="voice-status" id="voiceStatus">Listening...</div>
+            <button id="askButton" disabled>Ask Question</button>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Thinking...</p>
+            </div>
+
+            <div class="answer-box" id="answerBox">
+                <div class="answer-text" id="answerText"></div>
+                <div>
+                    <strong style="color: white;">Sources:</strong>
+                    <div class="sources" id="sources"></div>
+                </div>
+
+                <button class="citation-toggle" id="citationToggle" onclick="toggleCitations()">
+                    <span>🔍</span>
+                    <span id="toggleText">Show me where you found that</span>
+                </button>
+
+                <div class="citations-container" id="citationsContainer"></div>
+            </div>
+        </div>
+
+        <div class="section download-section">
+            <div class="section-title">Review Your Activity</div>
+            <button id="downloadButton">
+                Download Activity Log (Excel)
+            </button>
+            <p>Get a detailed record of all your questions and answers</p>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000';
+        let currentCitations = [];
+        let recognition = null;
+        let isListening = false;
+
+        // Initialize Speech Recognition
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = () => {
+                isListening = true;
+                document.getElementById('voiceButton').classList.add('listening');
+                document.getElementById('voiceStatus').classList.add('show');
+                document.getElementById('voiceStatus').textContent = '🎤 Listening...';
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('questionInput').value = transcript;
+                document.getElementById('voiceStatus').textContent = `✅ Got it: "${transcript}"`;
+                setTimeout(() => {
+                    document.getElementById('voiceStatus').classList.remove('show');
+                }, 2000);
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                document.getElementById('voiceStatus').textContent = `❌ Error: ${event.error}`;
+                setTimeout(() => {
+                    document.getElementById('voiceStatus').classList.remove('show');
+                }, 3000);
+            };
+
+            recognition.onend = () => {
+                isListening = false;
+                document.getElementById('voiceButton').classList.remove('listening');
+
+                // Clear the "Listening..." status if no result was received
+                const voiceStatus = document.getElementById('voiceStatus');
+                if (voiceStatus.textContent === '🎤 Listening...') {
+                    voiceStatus.classList.remove('show');
+                }
+            };
+        }
+        function toggleVoiceInput() {
+            if (!recognition) {
+                alert('Speech recognition is not supported in your browser. Please use Chrome, Edge, or Safari.');
+                return;
+            }
+
+            if (isListening) {
+                recognition.stop();
+                // Immediately clear the listening state
+                isListening = false;
+                document.getElementById('voiceButton').classList.remove('listening');
+                document.getElementById('voiceStatus').classList.remove('show');
+            } else {
+                recognition.start();
+            }
+        }
+
+        async function downloadActivity() {
+            try {
+                const response = await fetch(`${API_URL}/download_activity/`, {
+                    method: 'GET'
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = `study_buddy_activity_${new Date().toISOString().split('T')[0]}.xlsx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                } else {
+                    const errorData = await response.json();
+                    alert(`Error downloading activity log: ${errorData.detail || 'Please try again.'}`);
+                }
+            } catch (error) {
+                console.error('Download error:', error);
+                alert('Error downloading activity log. Please check if the server is running.');
+            }
+        }
+
+        function toggleCitations() {
+            const container = document.getElementById('citationsContainer');
+            const toggle = document.getElementById('citationToggle');
+            const toggleText = document.getElementById('toggleText');
+
+            if (container.classList.contains('show')) {
+                container.classList.remove('show');
+                toggle.classList.remove('active');
+                toggleText.textContent = 'Show me where you found that';
+            } else {
+                container.classList.add('show');
+                toggle.classList.add('active');
+                toggleText.textContent = 'Hide source citations';
+            }
+        }
+
+        function displayCitations(citations) {
+            const container = document.getElementById('citationsContainer');
+            currentCitations = citations;
+
+            if (!citations || citations.length === 0) {
+                container.innerHTML = '<p style="color: #8888aa; text-align: center;">No source citations available.</p>';
+                return;
+            }
+
+            container.innerHTML = citations.map((citation, index) => `
+                <div class="citation-item">
+                    <div class="citation-header">
+                        <span>📄</span>
+                        <span>Source ${index + 1} - Page ${citation.page}</span>
+                    </div>
+                    <div class="citation-text">${citation.text}</div>
+                </div>
+            `).join('');
+        }
+
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const uploadStatus = document.getElementById('uploadStatus');
+        const questionInput = document.getElementById('questionInput');
+        const askButton = document.getElementById('askButton');
+        const voiceButton = document.getElementById('voiceButton');
+        const downloadButton = document.getElementById('downloadButton');
+        const loading = document.getElementById('loading');
+        const answerBox = document.getElementById('answerBox');
+        const answerText = document.getElementById('answerText');
+        const sources = document.getElementById('sources');
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) await uploadPDF(file);
+        });
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('active');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('active');
+        });
+
+        uploadArea.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('active');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type === 'application/pdf') {
+                fileInput.files = e.dataTransfer.files;
+                await uploadPDF(file);
+            }
+        });
+
+        askButton.addEventListener('click', askQuestion);
+        voiceButton.addEventListener('click', toggleVoiceInput);
+        downloadButton.addEventListener('click', downloadActivity);
+        questionInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') askQuestion();
+        });
+
+        async function uploadPDF(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            uploadStatus.innerHTML = '<div class="status">Uploading...</div>';
+
+            try {
+                const response = await fetch(`${API_URL}/upload_pdf/`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    uploadStatus.innerHTML = `<div class="status success">✅ ${data.message}</div>`;
+                    questionInput.disabled = false;
+                    askButton.disabled = false;
+                    voiceButton.disabled = false;
+                } else {
+                    uploadStatus.innerHTML = `<div class="status error">❌ ${data.detail}</div>`;
+                }
+            } catch (error) {
+                uploadStatus.innerHTML = `<div class="status error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        async function askQuestion() {
+            const query = questionInput.value.trim();
+            if (!query) return;
+
+            loading.classList.add('show');
+            answerBox.classList.remove('show');
+            askButton.disabled = true;
+
+            try {
+                const response = await fetch(`${API_URL}/ask/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query })
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    answerText.textContent = data.answer;
+                    sources.innerHTML = data.sources.map(page =>
+                        `<span class="source-badge">Page ${page}</span>`
+                    ).join('');
+
+                    if (data.citations && data.citations.length > 0) {
+                        displayCitations(data.citations);
+                        document.getElementById('citationToggle').style.display = 'inline-flex';
+                    } else {
+                        document.getElementById('citationToggle').style.display = 'none';
+                    }
+
+                    document.getElementById('citationsContainer').classList.remove('show');
+                    document.getElementById('citationToggle').classList.remove('active');
+                    document.getElementById('toggleText').textContent = 'Show me where you found that';
+
+                    answerBox.classList.add('show');
+                } else {
+                    answerText.textContent = `Error: ${data.detail}`;
+                    sources.innerHTML = '';
+                    document.getElementById('citationToggle').style.display = 'none';
+                    answerBox.classList.add('show');
+                }
+            } catch (error) {
+                answerText.textContent = `Error: ${error.message}`;
+                sources.innerHTML = '';
+                document.getElementById('citationToggle').style.display = 'none';
+                answerBox.classList.add('show');
+            } finally {
+                loading.classList.remove('show');
+                askButton.disabled = false;
+            }
+        }
+    </script>
+</body>
+
+</html>
